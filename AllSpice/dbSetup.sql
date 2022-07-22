@@ -15,6 +15,8 @@ CREATE TABLE
         subtitle VARCHAR(255) NOT NULL,
         category VARCHAR(255) NOT NULL,
         creatorId VARCHAR(255) NOT NULL,
+        picture VARCHAR(255) NOT NULL,
+         
 
         FOREIGN KEY (creatorId) REFERENCES accounts(id) ON DELETE CASCADE
     ) default charset utf8 COMMENT '';
