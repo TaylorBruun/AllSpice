@@ -36,8 +36,30 @@ namespace AllSpice.Services
             return _repo.Create(recipeData);
         }
 
-        internal void Delete(int id)
+
+        internal Recipe Update(Recipe recipeData)
         {
+            Recipe found = _repo.GetById(recipeData.Id);
+            if (found.CreatorId != recipeData.CreatorId)
+            {
+                throw new Exception("You cannot edit a recipe you did not create");
+            }
+            found.Picture = recipeData.Picture ?? found.Picture;
+            found.Title = recipeData.Title ?? found.Title;
+            found.Subtitle = recipeData.Subtitle ?? found.Subtitle;
+            found.Category = recipeData.Category ?? found.Category;
+            _repo.Update(found);
+           
+            return found;
+            
+        }
+        internal void Delete(int id, string userId)
+        {
+            Recipe found = _repo.GetById(id);
+            if (found.CreatorId != userId)
+            {
+                throw new Exception("You cannot delete a recipe you did not create");
+            }
             _repo.Delete(id);
         }
     }

@@ -19,7 +19,8 @@ namespace AllSpice.Repositories
         internal List<Recipe> GetAll()
         {
             string sql = "SELECT recipes.*, accounts.* FROM recipes JOIN accounts ON recipes.creatorId = accounts.id";
-            return _db.Query<Recipe, Account, Recipe>(sql, (recipe, account)=>{
+            return _db.Query<Recipe, Account, Recipe>(sql, (recipe, account) =>
+            {
                 recipe.Creator = account;
                 return recipe;
             }).ToList();
@@ -27,8 +28,12 @@ namespace AllSpice.Repositories
 
         internal Recipe GetById(int id)
         {
-            string sql = "SELECT * FROM recipes WHERE id = @id";
-            return _db.QueryFirstOrDefault<Recipe>(sql, new { id });
+            string sql = "SELECT recipes.*, accounts.* FROM recipes JOIN accounts ON recipes.creatorId = accounts.id WHERE recipes.id = @id";
+            return _db.Query<Recipe, Account, Recipe>(sql, (recipe, account) =>
+            {
+                recipe.Creator = account;
+                return recipe;
+            }, new {id}).FirstOrDefault();
         }
 
         internal Recipe Create(Recipe recipeData)
@@ -39,6 +44,15 @@ namespace AllSpice.Repositories
             recipeData.Id = id;
             return recipeData;
         }
+
+        internal void Update(Recipe original)
+        {
+            string sql = "  UPDATE recipes SET picture=@Picture, title=@title, subtitle=@Subtitle, category=@Category WHERE id = @Id LIMIT 1;";
+
+            _db.Execute(sql, original);
+
+        }
+
         internal void Delete(int id)
         {
             string sql = "DELETE FROM recipes WHERE id = @id LIMIT 1";

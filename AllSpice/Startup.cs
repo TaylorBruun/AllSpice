@@ -36,6 +36,15 @@ namespace AllSpice
             services.AddScoped<AccountsRepository>();
             services.AddScoped<AccountService>();
 
+            services.AddTransient<IngredientsRepository>();
+            services.AddTransient<IngredientsService>();
+            
+            services.AddTransient<FavoritesRepository>();
+            services.AddTransient<FavoritesService>();
+
+            services.AddTransient<StepsRepository>();
+            services.AddTransient<StepsService>();
+
             services.AddTransient<RecipesRepository>();
             services.AddTransient<RecipesService>();
         }

@@ -14,13 +14,15 @@ namespace AllSpice.Controllers
     public class RecipesController : ControllerBase
     {
         private readonly RecipesService _recipesService;
+        private readonly IngredientsService _ingredientsService;
+        private readonly StepsService _stepsService;
 
-        public RecipesController(RecipesService recipesService)
+        public RecipesController(RecipesService recipesService, IngredientsService ingredientsService, StepsService stepsService)
         {
             _recipesService = recipesService;
+            _ingredientsService = ingredientsService;
+            _stepsService = stepsService;
         }
-
-
 
         [HttpGet]
         public ActionResult<List<Recipe>> Get()
@@ -68,14 +70,35 @@ namespace AllSpice.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
+        [HttpPut("{id}")]
         [Authorize]
-        public ActionResult<Recipe> Delete(int id)
+        public async Task<ActionResult<Recipe>> EditAsync(int id,[FromBody] Recipe updatedRecipeData)
         {
             try
             {
+                Account userInfo = await HttpContext.GetUserInfoAsync<Account>();
+                updatedRecipeData.Id = id;
+                updatedRecipeData.CreatorId = userInfo.Id;
+                Recipe updatedRecipe = _recipesService.Update(updatedRecipeData);
+                return Ok(updatedRecipe);
+            }
+            catch (System.Exception exception)
+            {
+                return BadRequest(exception.Message);
+            }
+        }
+
+
+        [HttpDelete("{id}")]
+        [Authorize]
+        public async Task<ActionResult<Recipe>> Delete(int id)
+        {
+            try
+            {
+                Account userInfo = await HttpContext.GetUserInfoAsync<Account>();
+                string userId = userInfo.Id;
                 Recipe recipe = _recipesService.GetById(id);
-                _recipesService.Delete(id);
+                _recipesService.Delete(id, userId);
                 return Ok(recipe);
             }
             catch (System.Exception exception)
@@ -83,5 +106,34 @@ namespace AllSpice.Controllers
                 return BadRequest(exception.Message);
             }
         }
+
+[HttpGet("{id}/ingredients")]
+    public ActionResult<List<Ingredient>> GetIngredientsByRecipe(int id)
+        {
+            try
+            {
+                List<Ingredient> ingredients = _ingredientsService.GetIngredientsByRecipe(id);
+                return Ok(ingredients);
+            }
+            catch (System.Exception exception)
+            {
+                return BadRequest(exception.Message);
+            }
+        }
+[HttpGet("{id}/steps")]
+    public ActionResult<List<Step>> GetStepsByRecipe(int id)
+        {
+            try
+            {
+                List<Step> steps = _stepsService.GetStepsByRecipe(id);
+                return Ok(steps);
+            }
+            catch (System.Exception exception)
+            {
+                return BadRequest(exception.Message);
+            }
+        }
+
+     
     }
 }
